@@ -1,16 +1,95 @@
 <link rel="import" href="../polymer/polymer-element.html">
-
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="owc-core-navigation-panel.html"> 
 <dom-module id="owc-core-window-manager">
-  <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-    <h2>Hello [[prop1]]!</h2>
-  </template>
+    <template>
+      <custom-style>
+        <style>
+         #component-container {
+            height: calc(100% - 48px);
+            width: calc(100% - 17px);
+        }
+        
+        #navigation-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow-x: var(--navigation-container-overflow, auto);
+            overflow-y: hidden;
+        }
+        
+        #navigation-scroll {
+            background-image: var(--theme-background-image);
+            background-size: cover;
+            background-repeat: repeat-x;
+            background-position: top left, top right;
+            background-color: var(--theme-default-color);
+            white-space: nowrap;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            white-space: nowrap;
+        }
+        
+        #navigation-scroll img {
+            margin: 20px 10px 0 10px;
+        }
+        
+        .back-button {
+            opacity: 0;
+            z-index: 900;
+        }
+        
+        .forward-button {
+            opacity: 0;
+            z-index: 900;
+        }
+        
+        paper-icon-button.forward-button {
+            position: fixed;
+            top: calc(50% - 20px);
+            right: 5px;
+            color: var(--paper-light-blue-500);
+            background: var(--paper-light-blue-50);
+            border-radius: 50%;
+        }
+        
+        paper-icon-button.forward-button:hover {
+            background: var(--paper-light-blue-100);
+            border-radius: 50%;
+        }
+        
+        paper-icon-button.back-button {
+            position: fixed;
+            top: calc(50% - 20px);
+            left: 5px;
+            color: var(--paper-light-blue-500);
+            background: var(--paper-light-blue-50);
+            border-radius: 50%;
+        }
+        
+        paper-icon-button.back-button:hover {
+            background: var(--paper-light-blue-100);
+            border-radius: 50%;
+        }
+        
+        .centered {
+            position: fixed;
+            /* or absolute */
+            top: 50%;
+            left: 50%;
+            z-index: 10;
+        }
+        </style>
+      </custom-style>
 
-  <script>
+      <paper-icon-button id="navigation-back-button" icon="arrow-back" on-click="scrollLeftButton" alt="heart" class="back-button"></paper-icon-button>
+        <paper-icon-button id="navigation-forward-button" icon="arrow-forward" on-click="scrollRightButton" alt="heart" class="forward-button"></paper-icon-button>
+        <div id="navigation-scroll">
+            <div id="navigation-container"></div>
+        </div>  
+    </template>
+    <script>
     /**
      * `owc-core-window-manager`
      * This component manages the currently displayed components using the navigation stack, which is represented by an array of components. The first element in the array is the root, the dynamic-main-menu. The last element in the array is the last component displayed at the right of the screen (in Desktop view). The user can add components to the stack using the method pushComponent of navigation manager and can remove all components from the navigation stack, except for the root element, using the popComponent method. In Desktop view the new component is pushed on the right of the last visualized component, while in Mobile view the new component is pushed up to the currently visualized component.
@@ -20,17 +99,424 @@
      * @demo demo/index.html
      */
     class OwcCoreWindowManager extends Polymer.Element {
-      static get is() { return 'owc-core-window-manager'; }
-      static get properties() {
-        return {
-          prop1: {
-            type: String,
-            value: 'owc-core-window-manager'
-          }
-        };
-      }
+        static get is() { return 'owc-core-window-manager'; }        
+
+        static get properties() {
+            return {
+                
+                counter: {
+                    type: Number,
+                    value: 0,
+                    notify: true
+                }
+            };
+        }
+
+        /**
+         *  Called when the element has been created, but before property values are set and local DOM is initialized.
+         */
+        created() {
+          this.MOBILE_MODE = Symbol();
+          this.DESKTOP_MODE = Symbol();
+          this.layoutMode = this.DESKTOP_MODE;
+          this.isMaximized=false;
+          this.updateStyles({'--theme-background-image': 'url("Sentinel-2-algeria.jpg")'});
+          this.updateStyles({'--theme-background-color':'rgba(233,244,255,0.94) !important'});
+          this.updateStyles({'--theme-default-color':'rgba(233,244,255,0.94) !important'});          
+        }
+
+        /**
+         *  Called after the element is attached to the document.
+         *  Can be called multiple times during the lifetime of an element.
+         *  The first 'attached' callback is guaranteed not to fire until after 'ready'
+         *
+         * @return {null}
+         */
+        attached() {          
+            this.__init__();
+        }
+
+        /**
+         * Clean the stack of components
+         *
+         * @param {Object} caller: what component is calling the clean method
+         * @return {null}
+         */
+        _cleanStack(caller) {
+            var callerIndex = -1;
+            for (var i = 0; i < this._navigationStack.length; i++) {
+                if (this._navigationStack[i] === caller)
+                    callerIndex = i;
+            }
+            if (callerIndex >= 0) {
+                var maxIndex = this._navigationStack.length - 1;
+                if (maxIndex != callerIndex) {
+                    var toRemove = maxIndex - callerIndex;
+                    for (var j = 0; j < toRemove; j++) {
+                        this.popComponent();
+                    }
+                }
+            }
+        }
+
+        /**
+         * Return the number of component instances pushed in the navigation stack.
+         *
+         * @param {String} component name
+         * @return {Number} number of component instances
+         */
+        _getComponentInstances(name) {
+            var instances = 0;
+            for (var i = 0; i < this._navigationStack.length; i++) {
+                if (this._navigationStack[i].componentName.localeCompare(name) == 0) {
+                    instances++;
+                }
+            }
+            return instances;
+        }
+
+        /**
+         * Hide navigation buttons (back and forward buttons)
+         *
+         * @return {null}
+         */
+        hideNavigationButtons() {
+            setTimeout(function() {
+                document.getElementById('navigation-back-button').style.opacity = 0;
+                document.getElementById('navigation-forward-button').style.opacity = 0;
+            }, 10);
+        }
+
+        /**
+         * Show navigation buttons (back and forward buttons)
+         *
+         * @return {null}
+         */
+        showNavigationButtons() {
+            setTimeout(function() {
+                document.getElementById('navigation-back-button').style.zIndex = 100;
+                document.getElementById('navigation-back-button').style.opacity = 0.8;
+                document.getElementById('navigation-forward-button').style.zIndex = 100;
+                document.getElementById('navigation-forward-button').style.opacity = 0.8;
+            }, 0);
+        }
+
+        /**
+         * Show or Hide navigation buttons via navigation stack dimension
+         *
+         * @return {null}
+         */
+        manageBackAndForwardButtons() {
+            if (this._navigationStack.length > 1)
+                this.showNavigationButtons();
+            else
+                this.hideNavigationButtons();
+        }
+
+        /**
+         * Allow to pop a component from navigation manager via ESC button
+         *
+         * @return {null}
+         */
+        manageEscButton() {
+            var self = this,
+                ESC_BUTTON_CODE = 27;
+            document.addEventListener('keyup', function(e) {
+                if (e.keyCode == ESC_BUTTON_CODE) {
+                    if (self._navigationStack.length > 1)
+                        self.popComponent();
+                }
+            });
+        }
+
+        /**
+         * Scroll navigation manager container (GUI part) to left
+         *
+         * @return {null}
+         */
+        scrollLeftButton() {
+            Polymer.dom(this.root).querySelector("#navigation-container").scrollLeft = 0;
+        }
+
+        /**
+         * Scroll navigation manager container (GUI part) to right
+         *
+         * @return {null}
+         */
+        scrollRightButton() {
+            Polymer.dom(this.root).querySelector("#navigation-container").scrollLeft = Polymer.dom(this.root).querySelector('#navigation-container').childNodes[this._navigationStack.length - 1].offsetLeft;
+        }
+
+        /**
+         * Manager responsive layout
+         *
+         * @param {Function} xsCallback: callback for XSmall screen size
+         * @param {Function} smCallback: callback for Small screen size
+         * @param {Function} mdCallback: callback for Medium screen size
+         * @param {Function} lgCallback: callback for Large screen size
+         * @return {null}
+         */
+        responsiveLayout(xsCallback, smCallback, mdCallback, lgCallback) {
+            var XS_LIMIT = 768,
+                SM_LIMIT = 992,
+                MD_LIMIT = 1200,
+                screen = window.innerWidth;
+            if (screen <= XS_LIMIT) xsCallback();
+            if (screen > XS_LIMIT && screen <= SM_LIMIT) smCallback();
+            if (screen > SM_LIMIT && screen <= MD_LIMIT) mdCallback();
+            if (screen > MD_LIMIT) lgCallback();
+        }
+
+        /**
+         * Remove all components from navigation manager.
+         *
+         * @return {null}
+         */
+        removeAll() {
+            var self = this;
+            var elm = Polymer.dom(self.root).querySelector('#navigation-container');
+            var childNodes = elm.childNodes;
+
+            for (var i = childNodes.length - 1; i > 0; i--) {
+                elm.removeChild(elm.lastChild);
+                this._navigationStack.splice(i, 1);
+            }
+            this.manageBackAndForwardButtons();
+            this.refreshLayout();
+
+
+        }
+
+
+        /**
+         * Remove a component from navigation manager by uuid.
+         *
+         * @param {Function} xsCallback: callback for XSmall screen size
+         * @return {null}
+         */
+        removePanel(uuid) {
+            var self = this;
+            var panelToRemove = _.findWhere(this._navigationStack, {
+                uuid: uuid
+            });
+            var index = _.indexOf(this._navigationStack, panelToRemove);
+            if (index > 0) {
+                var containerView = Polymer.dom(self.root).querySelector('#navigation-container');
+                Polymer.dom(containerView).removeChild(Polymer.dom(self.root).querySelector('#navigation-container').childNodes[index]);
+                this._navigationStack.splice(index, 1);
+            }
+            this.manageBackAndForwardButtons();
+            this.refreshLayout();
+        }
+
+        /**
+         * Return component container.
+         *
+         * @return {Object} component container
+         */
+        getContainer() {
+            var self = this;
+            return Polymer.dom(self.root).querySelector('#navigation-container');
+        }
+
+        /**
+         * Manage Mobile Layout
+         *
+         * @return {null}
+         */
+        drawMobileLayout() {
+            var self = this;
+            var lastPanel = this.getLastPanel();
+            if (lastPanel) {
+                lastPanel.fullScreen();
+                this.hideNavigationButtons();
+                self.customStyle['--navigation-container-overflow'] = 'hidden';
+                self.updateStyles();
+            }
+        }
+
+        /**
+         * Manage Desktop Layout
+         *
+         * @return {null}
+         */
+
+        drawDesktopLayout() {
+            var panels = this.getPanels();
+            for (var i = 0; i < panels.length; i++)
+                panels[i].normalScreen();
+            this.manageBackAndForwardButtons();
+            this.customStyle['--navigation-container-overflow'] = 'auto';
+            this.updateStyles();
+        }
+
+        /**
+         * Refresh layout
+         *
+         * @return {null}
+         */
+        refreshLayout() {
+            switch (this.layoutMode) {
+                case this.MOBILE_MODE:
+                    this.drawMobileLayout();
+                    break;
+                case this.DESKTOP_MODE:
+                    this.drawDesktopLayout();
+                    break;
+            }
+        }
+
+        /**
+         * Set layout mode [MOBILE | DESKTOP]
+         *
+         * @param {Symbol} layout mode
+         * @return {null}
+         */
+        setLayoutMode(mode) {
+            this.layoutMode = mode;
+            this.refreshLayout();
+        }
+
+        /**
+         * Manage layout by screen
+         *
+         * @return {null}
+         */
+        manageScreenResize() {
+
+            var self = this;
+            window.addEventListener("resize", function() {
+                if (self.isMaximized)
+                    return;
+                self.responsiveLayout(
+                    function xs() {
+
+                        self.setLayoutMode(self.MOBILE_MODE);
+                    },
+                    function sm() {
+
+                        self.setLayoutMode(self.MOBILE_MODE);
+                    },
+                    function md() {
+
+                        self.setLayoutMode(self.DESKTOP_MODE);
+                    },
+                    function lg() {
+
+                        self.setLayoutMode(self.DESKTOP_MODE);
+                    }
+                );
+            });
+        }
+
+        /**
+         * Get the last panel pushed in the navigation manager
+         *
+         * @return {Object} last panel pushed in the navigation manager
+         */
+        getLastPanel() {
+            return document.getElementById('navigation-container').lastChild;
+        }
+
+        /**
+         * Get  panels pushed in the navigation manager
+         *
+         * @return {Object} panels pushed in the navigation manager
+         */
+        getPanels() {
+            return document.getElementById('navigation-container').childNodes;
+        }
+
+        /**
+         * Pop a polymer from navigation-component.
+         *
+         * @return {null}
+         */
+        popComponent() {
+            if (this._navigationStack.length > 1) {
+                this.pop('_navigationStack');
+                var containerView = document.getElementById('navigation-container');
+                containerView.lastChild.style.width = "0px";
+                containerView.removeChild(containerView.lastChild);
+            }
+            this.manageBackAndForwardButtons();
+            this.refreshLayout();
+        }
+
+        /**
+         * Push a polymer to navigation-component.
+         *
+         * @param {Polymer.Base} component: The new polymer to show in the navigation.
+         * @param {Number} panelWidth: (pixel) of container panel.
+         * @param {String} title:  Title of panel.
+         * @param {Boolean} hideCloseButton: If true the close button of panel isn't shown
+         * @param {Boolean} resizable: If the panel is resizable
+         * @param {Number} maxInstances: Max instances of panels pushed in the navigation system for this panel.
+         * @return {null}
+         */
+        pushComponent(component, panelWidth, title, hideCloseButton, resizable, maxInstances, hideMaxMinButton) {
+            var self = this;
+            var componentInstances = 0;
+            var panel = document.createElement('owc-core-navigation-panel');
+            var containerView = Polymer.dom(self.root).querySelector('#navigation-container');
+            panel.style.width = panelWidth;
+            self.uuid++;
+            panel.uuid = self.uuid;
+            panel.title = self.i18n(title);
+            panel.resizable = resizable;
+            panel.navigationManager = self;
+            panel.properties.hideclosebutton.value = hideCloseButton;
+            panel.properties.hidemaxminbutton.value = hideMaxMinButton;
+            panel.componentName = component.is;
+            panel.maxInstances = maxInstances;  //TODO: add configurable parameter
+            component.parentPanel = panel;
+            panel.content = component;
+            componentInstances = this._getComponentInstances(component.is);
+            if (componentInstances < panel.maxInstances) {
+                Polymer.dom(panel.root).querySelector('#component-container').appendChild(component);
+
+                Polymer.dom(containerView).appendChild(panel);
+                self.push('_navigationStack', panel);
+                this.manageBackAndForwardButtons();
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true, true);
+                document.dispatchEvent(event);
+                self.scrollRightButton();
+            } /*else {
+                self.owcApp.toastManager.info(self.i18n("Reached maximum number of component's instances"));
+            }*/
+        }
+
+        /**
+         * Initialize the navigation manager
+         *
+         * @return {null}
+         */
+        __init__() {
+            var self = this;
+            self.uuid = 0;
+
+            /**
+             * Navigation stack contains the list of pushed components.
+             *
+             * @type {Array}
+             */
+            this._navigationStack = [];
+
+            /**
+             * Navigation container (HTML Element)
+             *
+             * @type {DOM node}
+             */
+            this._containerView = {};
+            this._containerView = document.getElementById('navigation-container');
+
+            this.manageBackAndForwardButtons();
+            this.manageEscButton();
+            this.manageScreenResize();
+        }
     }
 
     window.customElements.define(OwcCoreWindowManager.is, OwcCoreWindowManager);
-  </script>
+    </script>
 </dom-module>
