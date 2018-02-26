@@ -1,6 +1,8 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
-<link rel="import" href="owc-core-navigation-panel.html"> 
+<link rel="import" href="../owc-core-window-manager/owc-core-navigation-panel.html">
+<!-- <link rel="import" href="../underscore/underscore-min.js"> -->
+<script src="../underscore/underscore-min.js"></script>
 <dom-module id="owc-core-window-manager">
     <template>
       <custom-style>
@@ -9,7 +11,7 @@
             height: calc(100% - 48px);
             width: calc(100% - 17px);
         }
-        
+
         #navigation-container {
             position: fixed;
             width: 100%;
@@ -17,7 +19,7 @@
             overflow-x: var(--navigation-container-overflow, auto);
             overflow-y: hidden;
         }
-        
+
         #navigation-scroll {
             background-image: var(--theme-background-image);
             background-size: cover;
@@ -30,21 +32,21 @@
             position: fixed;
             white-space: nowrap;
         }
-        
+
         #navigation-scroll img {
             margin: 20px 10px 0 10px;
         }
-        
+
         .back-button {
             opacity: 0;
             z-index: 900;
         }
-        
+
         .forward-button {
             opacity: 0;
             z-index: 900;
         }
-        
+
         paper-icon-button.forward-button {
             position: fixed;
             top: calc(50% - 20px);
@@ -53,12 +55,12 @@
             background: var(--paper-light-blue-50);
             border-radius: 50%;
         }
-        
+
         paper-icon-button.forward-button:hover {
             background: var(--paper-light-blue-100);
             border-radius: 50%;
         }
-        
+
         paper-icon-button.back-button {
             position: fixed;
             top: calc(50% - 20px);
@@ -67,12 +69,12 @@
             background: var(--paper-light-blue-50);
             border-radius: 50%;
         }
-        
+
         paper-icon-button.back-button:hover {
             background: var(--paper-light-blue-100);
             border-radius: 50%;
         }
-        
+
         .centered {
             position: fixed;
             /* or absolute */
@@ -87,7 +89,7 @@
         <paper-icon-button id="navigation-forward-button" icon="arrow-forward" on-click="scrollRightButton" alt="heart" class="forward-button"></paper-icon-button>
         <div id="navigation-scroll">
             <div id="navigation-container"></div>
-        </div>  
+        </div>
     </template>
     <script>
     /**
@@ -99,30 +101,73 @@
      * @demo demo/index.html
      */
     class OwcCoreWindowManager extends Polymer.Element {
-        static get is() { return 'owc-core-window-manager'; }        
+        static get is() { return 'owc-core-window-manager'; }
 
         static get properties() {
             return {
-                
+
                 counter: {
                     type: Number,
                     value: 0,
                     notify: true
+                },
+                _navigationStack:{
+                  type: Array,
+                  value: []
+                },
+                _containerView:{
+                  type: Object,
+                  value: {}
+
                 }
             };
         }
 
-        /**
-         *  Called when the element has been created, but before property values are set and local DOM is initialized.
-         */
-        created() {
+
+        _boundListener(){
+          console.log("_boundListener");
+        }
+
+        _myLocationListener(){
+          console.log("_myLocationListener");
+        }
+
+        // constructor() {
+        //   super();
+        //
+        // }
+
+        connectedCallback() {
+          super.connectedCallback();
+          window.addEventListener('hashchange', this._boundListener);
+          console.warn("HEELO FROM CALLBACK OF OWC_CORE_WINDOW_M");
+          this._boundListener = this._myLocationListener.bind(this);
+          console.warn("hello from constructor");
+
           this.MOBILE_MODE = Symbol();
           this.DESKTOP_MODE = Symbol();
           this.layoutMode = this.DESKTOP_MODE;
           this.isMaximized=false;
           this.updateStyles({'--theme-background-image': 'url("Sentinel-2-algeria.jpg")'});
           this.updateStyles({'--theme-background-color':'rgba(233,244,255,0.94) !important'});
-          this.updateStyles({'--theme-default-color':'rgba(233,244,255,0.94) !important'});          
+          this.updateStyles({'--theme-default-color':'rgba(233,244,255,0.94) !important'});
+          console.log("hello from created()");
+
+          this.__init__();
+
+        }
+
+        disconnectedCallback() {
+          super.disconnectedCallback();
+          window.removeEventListener('hashchange', this._boundListener);
+          console.warn("disconnectedCallback");
+        }
+
+        /**
+         *  Called when the element has been created, but before property values are set and local DOM is initialized.
+         */
+        created() {
+
         }
 
         /**
@@ -132,8 +177,8 @@
          *
          * @return {null}
          */
-        attached() {          
-            this.__init__();
+        attached() {
+
         }
 
         /**
@@ -207,10 +252,10 @@
          * @return {null}
          */
         manageBackAndForwardButtons() {
-            if (this._navigationStack.length > 1)
-                this.showNavigationButtons();
-            else
-                this.hideNavigationButtons();
+            // if (this._navigationStack.length > 1)
+            //     this.showNavigationButtons();
+            // else
+            //     this.hideNavigationButtons();
         }
 
         /**
@@ -329,7 +374,7 @@
             var lastPanel = this.getLastPanel();
             if (lastPanel) {
                 lastPanel.fullScreen();
-                this.hideNavigationButtons();
+                //this.hideNavigationButtons();
                 self.customStyle['--navigation-container-overflow'] = 'hidden';
                 self.updateStyles();
             }
@@ -346,8 +391,8 @@
             for (var i = 0; i < panels.length; i++)
                 panels[i].normalScreen();
             this.manageBackAndForwardButtons();
-            this.customStyle['--navigation-container-overflow'] = 'auto';
-            this.updateStyles();
+            this.updateStyles({'--navigation-container-overflow':'auto'});
+            
         }
 
         /**
@@ -424,7 +469,15 @@
          * @return {Object} panels pushed in the navigation manager
          */
         getPanels() {
-            return document.getElementById('navigation-container').childNodes;
+            var panels = Polymer.dom(this.root).querySelector('#navigation-container').childNodes;
+            console.warn("getPanels()");
+            console.log("panels: ", panels);
+            return panels;
+            // return document.getElementById('navigation-container').childNodes;
+            // var getp = Polymer.dom(this.root).querySelector("#navigation-container");
+            // var childNodes = getp.childNodes;
+            // return childNodes;
+
         }
 
         /**
@@ -455,36 +508,46 @@
          * @return {null}
          */
         pushComponent(component, panelWidth, title, hideCloseButton, resizable, maxInstances, hideMaxMinButton) {
+            console.warn("HELLO from pushComponent");
             var self = this;
             var componentInstances = 0;
             var panel = document.createElement('owc-core-navigation-panel');
+            //var panel = new OwcCoreNavigationPanel();
+            console.log("~~~~~> panel: ", panel);
             var containerView = Polymer.dom(self.root).querySelector('#navigation-container');
+            console.log("::::containerView: ", containerView);
             panel.style.width = panelWidth;
             self.uuid++;
             panel.uuid = self.uuid;
-            panel.title = self.i18n(title);
+            panel.title = title;//self.i18n(title);
             panel.resizable = resizable;
             panel.navigationManager = self;
-            panel.properties.hideclosebutton.value = hideCloseButton;
-            panel.properties.hidemaxminbutton.value = hideMaxMinButton;
+          //  panel.properties.hideclosebutton.value = hideCloseButton;
+          //  panel.properties.hidemaxminbutton.value = hideMaxMinButton;
             panel.componentName = component.is;
             panel.maxInstances = maxInstances;  //TODO: add configurable parameter
             component.parentPanel = panel;
             panel.content = component;
             componentInstances = this._getComponentInstances(component.is);
-            if (componentInstances < panel.maxInstances) {
-                Polymer.dom(panel.root).querySelector('#component-container').appendChild(component);
+          //  if (componentInstances < panel.maxInstances) {
+                // console.log("Polymer.dom: ", Polymer.dom);
+                // console.log("Polymer.dom(panel.root): ", Polymer.dom(panel.root));
+                // console.log("Polymer.dom(panel.root).querySelector('#component-container'): ",   Polymer.dom(panel.root).querySelector('#component-container'));
+                // console.log("panel.getComponentContainer(): ", panel.getComponentContainer());
+                //Polymer.dom(panel.root).querySelector('#component-container').appendChild(component);
 
                 Polymer.dom(containerView).appendChild(panel);
+
+                panel.getComponentContainer().appendChild(component);
                 self.push('_navigationStack', panel);
                 this.manageBackAndForwardButtons();
                 var event = document.createEvent('Event');
                 event.initEvent('resize', true, true);
                 document.dispatchEvent(event);
                 self.scrollRightButton();
-            } /*else {
-                self.owcApp.toastManager.info(self.i18n("Reached maximum number of component's instances"));
-            }*/
+            //} /*else {
+            //    self.owcApp.toastManager.info(self.i18n("Reached maximum number of component's instances"));
+          //  }*/
         }
 
         /**
@@ -493,21 +556,11 @@
          * @return {null}
          */
         __init__() {
+            console.warn("__INIT__");
             var self = this;
             self.uuid = 0;
 
-            /**
-             * Navigation stack contains the list of pushed components.
-             *
-             * @type {Array}
-             */
             this._navigationStack = [];
-
-            /**
-             * Navigation container (HTML Element)
-             *
-             * @type {DOM node}
-             */
             this._containerView = {};
             this._containerView = document.getElementById('navigation-container');
 

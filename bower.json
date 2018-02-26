@@ -5,7 +5,8 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "paper-icon-button": "PolymerElements/paper-icon-button#2.0.1",
-    "paper-styles": "PolymerElements/paper-styles#2.0.0"
+    "paper-styles": "PolymerElements/paper-styles#2.0.0",
+    "underscore": "1.8.3"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
