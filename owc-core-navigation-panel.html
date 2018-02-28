@@ -19,16 +19,6 @@
             height: var(--heightnav, 500px);
         }
 
-        /*:host:hover .close-panel-button,
-        :host.hover .close-panel-button {
-            display: block !important;
-        }*/
-
-        /*:host:hover .maximize-panel-button,
-        :host.hover .maximize-panel-button {
-            display: block !important;
-        }*/
-
         .close-panel-button {
             display: var(--close-panel-button-display, none);
         }
@@ -41,10 +31,7 @@
             width: var(--paper-navigation-panel-container-width, calc(100% - 10px));
             position: var(--paper-navigation-panel-container-position, relative);
             margin-left: var (--paper-navigation-panel-left, 5px !important);
-            /*background: white;
-        opacity: var(--paper-navigation-panel-opacity, "0.94 !important");*/
             opacity: var(--paper-navigation-panel-opacity, "0.94 !important");
-            /*background-color: rgba(255, 255, 255, 0.94)!important;*/
         }
 
         .paper-navigation-panel-container {
@@ -60,10 +47,6 @@
             height: calc(100% - 10px) !important;
         }
 
-        /*.paper-navigation-panel:hover .close-panel-button,
-        .paper-navigation-panel.hover .close-panel-button {
-            display: block;
-        }*/
 
         .close-panel-button {
             position: var(--close-panel-button, absolute !important);
@@ -156,60 +139,21 @@
         static get is() { return 'owc-core-navigation-panel'; }
         static get properties() {
             return {
-                prop1: {
-                    type: String,
-                    value: 'owc-core-navigation-panel'
-                },
                 uuid: {
                     type: Number,
                     value: 0,
                     notify: true,
                     readOnly: false
                 },
+
                 /**
-                 * Size of panel
+                 * width of panel
                  *
                  * @type {Object}
                  */
-                size: {
-                    type: Object,
-                    value: {
-                        width: 0
-                    }
-                },
-
-                /**
-                 * Resizable boolean
-                 *
-                 * @type {Boolean}
-                 */
-                resizable: {
-                    type: Boolean,
-                    value: true
-                },
-
-                /**
-                 * Hide close button condition
-                 *
-                 * @type {Boolean}
-                 */
-                hideclosebutton: {
-                    type: Boolean,
-                    value: false,
-                    notify: true,
-                    readOnly: false
-                },
-
-                /**
-                 * Hide close button condition
-                 *
-                 * @type {Boolean}
-                 */
-                hidemaxminbutton: {
-                    type: Boolean,
-                    value: false,
-                    notify: true,
-                    readOnly: false
+                width: {
+                    type: Number,
+                    value: 0
                 },
 
                 /**
@@ -224,267 +168,40 @@
                 },
 
                 /**
-                 * icon shown to switch from normal to full screen mode and viceversa
+                 * Panel content
                  *
                  * @type {String}
                  */
-                buttonIcon: {
-                    type: String,
-                    value: "flip-to-front"
+                content: {
+                    type: Object,
+                    value: {},
+                    notify: true
                 },
 
                 /**
-                 * title shown to switch from normal to full screen mode and viceversa
+                 * component name
                  *
                  * @type {String}
                  */
-                buttonTitle: {
+                name: {
                     type: String,
-                    value: "Maximize Panel"
-                },
-
-                /**
-                 * maximizable panel condition
-                 *
-                 * @type {Boolean}
-                 */
-                isMaximizable: {
-                    type: Boolean,
-                    value: true
+                    value: "",
+                    notify: true
                 }
             };
         }
 
+        embeedComponent(component){
+          this.shadowRoot.querySelector('#component-container').appendChild(component);
+        }
+
         constructor(){
           super();
-
         }
 
         connectedCallback(){
           super.connectedCallback();
-
           this.__init();
-        }
-
-
-        created() {
-          this.size = {};
-        }
-
-        getComponentContainer(){
-          console.warn("========================?>>getComponentContainer()");
-          console.log("Polymer.dom(this.root): ", Polymer.dom(this.root));
-          console.log("Polymer.dom(null): ", Polymer.dom(null));
-          console.log("this.shadowRoot: ", this.shadowRoot);
-          console.log("document.querySelector('#component-container'): ", document.querySelector('#component-container'));
-          console.log("document.getElementById('component-container'): ", document.getElementById('component-container'));
-          return  this.shadowRoot.querySelector('#component-container'); //Polymer.dom(this.root).querySelector('#component-container');
-        }
-
-
-        /**
-         *  This method sets the paper-navigation-panel style for mobile view
-         *
-         * @return {null}
-         */
-
-        fullScreen() {
-            var self=this;
-            this.style.height = parseInt(window.height) + 'px';
-            this.style.left = 0;
-            this.style.position = "fixed";
-            this.fullScreenMode = true;
-            //this.closeButtonAlwaysVisible();
-            //this.maxMinButtonAlwaysVisible();
-            this.disableResize();
-            this.customStyle['--paper-navigation-panel-container-width'] = '100% !important';
-            this.customStyle['--paper-navigation-panel-container-height'] = '100% !important';
-            this.customStyle['--paper-navigation-panel-left'] = '0 !important';
-            this.customStyle['--paper-navigation-panel-container-position'] = 'fixed';
-            this.customStyle['--paper-navigation-panel-opacity'] = "1.0 !important";
-            this.customStyle['--close-panel-button'] = 'fixed !important';
-            this.customStyle['--maximize-panel-button'] = 'fixed !important';
-            this.customStyle['--theme-background-color'] = 'white !important'
-            this.updateStyles();
-            if (typeof(self.content.resize) == "function") {
-                $(window).trigger('resize');
-                self.content.resize();
-            }
-        }
-
-        /**
-         *  This method sets the paper-navigation-panel style for desktop view
-         *
-         * @return {null}
-         */
-
-        normalScreen() {
-            var self = this;
-            var currentPanel = _.findWhere(self.navigationManager._navigationStack, {
-                uuid: self.uuid
-            });
-            var index = _.indexOf(self.navigationManager._navigationStack, currentPanel);
-            if (index >= 0) {
-                self.navigationManager.getContainer().childNodes[index].style.width = 500;
-                if (self.navigationManager.getContainer().childNodes[index])
-                    self.style.width = parseInt(self.navigationManager.getContainer().childNodes[index].size.width + 0);
-            }
-            if (self.navigationManager.getContainer().childNodes[index])
-                self.style.width = parseInt(self.navigationManager.getContainer().childNodes[index].size.width + 0);
-            this.style.left = 0;
-            this.style.position = "relative";
-            this.fullScreenMode = false;
-          //  this.closeButtonHoverVisible();
-          //  this.maxMinButtonHoverVisible();
-            //this.activeResize();
-            this.updateStyles({
-              '--paper-navigation-panel-container-padding': '5px',
-              '--paper-navigation-panel-container-margin':'5px auto',
-              '--paper-navigation-panel-container-width': 'calc(100% - 10px)',
-              '--paper-navigation-panel-container-height': 'calc(100% - 20px)',
-              '--host-width': "100px",
-              '--paper-navigation-panel-left': '5 !important',
-              '--paper-navigation-panel-container-position': 'relative',
-              '--theme-background-color': '',
-              '--close-panel-button': 'absolute !important',
-              '--maximize-panel-button': 'absolute !important'
-            });
-            //this.customStyle['--paper-navigation-panel-container-padding'] = '5px';
-            // this.customStyle['--paper-navigation-panel-container-margin'] = '5px auto';
-            // this.customStyle['--paper-navigation-panel-container-width'] = 'calc(100% - 10px)';
-            // this.customStyle['--paper-navigation-panel-container-height'] = 'calc(100% - 20px)';
-            // this.customStyle['--host-width'] = "100px";
-            // this.customStyle['--paper-navigation-panel-left'] = '5 !important';
-            // this.customStyle['--paper-navigation-panel-container-position'] = 'relative';
-            // this.customStyle['--theme-background-color'] = '';
-            // this.customStyle['--close-panel-button'] = 'absolute !important';
-            // this.customStyle['--maximize-panel-button'] = 'absolute !important';
-
-
-
-
-            this.updateStyles();
-            if (typeof(self.content.resize) == "function") {
-                $(window).trigger('resize');
-                self.content.resize();
-            }
-        }
-
-        /**
-         *  This method enables the paper-navigation-panel resize
-         *
-         * @return {null}
-         */
-        // activeResize() {
-        //     this.customStyle['--paper-navigation-panel-resize-display'] = 'block';
-        //     this.updateStyles();
-        // }
-
-        /**
-         *  This method disables the paper-navigation-panel resize
-         *
-         * @return {null}
-         */
-        disableResize() {
-            this.customStyle['--paper-navigation-panel-resize-display'] = 'none';
-            this.updateStyles();
-        }
-
-        /**
-         *  This method removes the current panel from the navigation manager
-         *
-         * @return {null}
-         */
-        closePanel() {
-            this.navigationManager.removePanel(this.uuid);
-        }
-
-        /**
-         *  This method sets the close button always visible
-         *
-         * @return {null}
-         */
-        closeButtonAlwaysVisible() {
-            this.customStyle['--close-panel-button-display'] = 'block';
-            this.updateStyles();
-
-        }
-
-        /**
-         *  This method sets the close button visible only on hover
-         *
-         * @return {null}
-         */
-        // closeButtonHoverVisible() {
-        //     this.customStyle['--close-panel-button-display'] = 'none';
-        //     this.updateStyles();
-        // }
-
-        /**
-         *  This method sets the maximize/minimize button always visible
-         *
-         */
-        // maxMinButtonAlwaysVisible() {
-        //     this.customStyle['--maximize-panel-button-display'] = 'block';
-        //     this.updateStyles();
-        //
-        // }
-
-        /**
-         *  This method sets the maximize/minimize button always visible
-         *
-         */
-        // maxMinButtonHoverVisible() {
-        //     this.customStyle['--maximize-panel-button-display'] = 'none';
-        //     this.updateStyles();
-        //
-        // }
-
-        attached() {
-            var self = this;
-            this.__init();
-            // if (self.properties.hideclosebutton.value) {
-            //     var containerView = Polymer.dom(self.root).querySelector('.close-panel-button-container');
-            //     Polymer.dom(containerView).removeChild(Polymer.dom(self.root).querySelector('.close-panel-button'));
-            // }
-            // if (self.properties.hidemaxminbutton.value) {
-            //     var containerView = Polymer.dom(self.root).querySelector('.close-panel-button-container');
-            //     Polymer.dom(containerView).removeChild(Polymer.dom(self.root).querySelector('.maximize-panel-button'));
-            // }
-        }
-
-        /**
-         *  This method returns the height and width of component-container
-         *
-         * @return {Object}
-         */
-        getSize() {
-            return {
-                height: this.$['component-container'].offsetHeight,
-                width: this.$['component-container'].offsetWidth
-            };
-        }
-
-        /**
-         *  This method is used to switch from Normal to Full screen size and viceversa
-         *
-         */
-        switchPanelView() {
-            if (this.isMaximizable) {
-                this.buttonIcon = "flip-to-back";
-                this.buttonTitle = "Restore Panel";
-                this.fullScreen();
-            } else {
-                this.buttonIcon = "flip-to-front";
-                this.buttonTitle = "Maximize Panel";
-                this.normalScreen()
-            }
-            this.isMaximizable = !this.isMaximizable;
-            this.navigationManager.isMaximized=!this.navigationManager.isMaximized;
-            this.set('buttonIcon', this.buttonIcon);
-            this.notifyPath('buttonIcon', this.buttonIcon);
-            this.set('buttonTitle', this.buttonTitle);
-            this.notifyPath('buttonTitle', this.buttonTitle);
         }
 
         /**
@@ -496,38 +213,6 @@
             var self = this;
             self.resize = false;
 
-            window.addEventListener('resize', function() {
-                if (typeof(self.content.resize) == "function")
-                    self.content.resize();
-            });
-
-            Polymer.dom(self.root).querySelector('#resizer').addEventListener('mousedown', function() {
-                self.startX = event.clientX;
-                self.startY = event.clientY;
-                Polymer.dom(self.root).querySelector('#navigation-panel');
-                self.startWidth = parseInt(self.style.width, 10);
-                self.startHeight = parseInt(self.style.height, 10);
-                self.resize = true;
-            }, false);
-
-            document.addEventListener('mouseup', function() {
-                self.resize = false;
-                if (typeof(self.content.resize) == "function") {
-                    $(window).trigger('resize');
-                    self.content.resize();
-                }
-            }, false);
-
-            document.addEventListener('mousemove', function(event) {
-                if (self.resize) {
-                    self.style.width = (self.startWidth + event.clientX - self.startX) + 'px';
-                    var currentPanel = _.findWhere(self.navigationManager._navigationStack, {
-                        uuid: self.uuid
-                    });
-                    var index = _.indexOf(self.navigationManager._navigationStack, currentPanel);
-                    self.navigationManager.getContainer().childNodes[index].size.width = parseInt(self.style.width + 0);
-                }
-            }, false);
         }
     }
 
