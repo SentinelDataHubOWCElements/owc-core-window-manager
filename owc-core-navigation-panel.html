@@ -6,13 +6,15 @@
       <custom-style>
         <style is="custom-style">
          :host {
-            height: calc(100% - 2.5px) !important;
+            height: calc(100% - 5px) !important;
             width: var(--host-width, 200px);
+            margin: 5px;
             display: inline-block;
             position: relative;
             margin-left: var (--paper-navigation-panel-left, 5px !important);
             margin-right: 5px;
             min-width: 150px;
+            background-color: white;
         }
 
         :host {
@@ -32,13 +34,14 @@
             position: var(--paper-navigation-panel-container-position, relative);
             margin-left: var (--paper-navigation-panel-left, 5px !important);
             opacity: var(--paper-navigation-panel-opacity, "0.94 !important");
+
         }
 
         .paper-navigation-panel-container {
             position: absolute;
             overflow: hidden;
             width: calc(100% - 15px);
-            height: calc(100% - 45px);
+            height: calc(100%);
             font-size: 20px;
         }
 
@@ -111,6 +114,11 @@
             user-select: none;
             display: var(--paper-navigation-panel-resize-display, block);
             resize: horizontal;
+        }
+
+        #component-container{
+
+            /*background-color: white;*/
         }
 
         .shadow-2dp { @apply --shadow-elevation-2dp; }
