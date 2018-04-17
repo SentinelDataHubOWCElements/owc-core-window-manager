@@ -4,255 +4,111 @@
 <script src="../underscore/underscore-min.js"></script>
 <dom-module id="owc-core-window-manager">
     <template>
-      <custom-style>
         <style>
-         #component-container {
-            height: calc(100% - 48px);
-            width: calc(100% - 17px);
-        }
+          :host{
+              position:absolute;
+              width: 100%;
+              height: 100%;
 
-        #navigation-container {
-            position: fixed;
+          }
+          .owc-core-window-manager-viewport{
+            position: absolute;
             width: 100%;
             height: 100%;
-            overflow-x: var(--navigation-container-overflow, auto);
+            overflow-x: var(--owc-core-window-manager-viewport-overflow, auto);
+            background-image: var(--owc-core-window-manager-background-image);
+            background: #FAFAFA;
             overflow-y: hidden;
+            overflow-x: auto !important;
 
-        }
+          }
 
-        #navigation-scroll {
-            /*background-image: var(--theme-background-image);*/
-            background-size: cover;
-            background-repeat: repeat-x;
-            background-position: top left, top right;
-            background-color: var(--theme-default-color);
-            white-space: nowrap;
-            width: 100%;
+          #panels-container{
+            position:relative;
             height: 100%;
-            position: fixed;
-            white-space: nowrap;
-            padding: 5px;
+            width:100%;
+          }
 
-        }
+          .owc-core-window-manager-container{
 
-        #main-container{
-          position: fixed;
-          height: 100%;
-          width: 100%;
-          top: 0px;
-          left: 0px;
-          background-image: url("../../images/default-background2.jpeg");
-          -webkit-background-size: cover;
-          -moz-background-size: cover;
-          -o-background-size: cover;
-          background-size: cover;
-        }
+          }
 
-        #navigation-scroll img {
-            margin: 20px 10px 0 10px;
-        }
-
-        .back-button {
-            opacity: 0;
-            z-index: 900;
-        }
-
-        .forward-button {
-            opacity: 0;
-            z-index: 900;
-        }
-
-        paper-icon-button.forward-button {
-            position: fixed;
-            top: calc(50% - 20px);
-            right: 5px;
-            color: var(--paper-light-blue-500);
-            background: var(--paper-light-blue-50);
-            border-radius: 50%;
-        }
-
-        paper-icon-button.forward-button:hover {
-            background: var(--paper-light-blue-100);
-            border-radius: 50%;
-        }
-
-        paper-icon-button.back-button {
-            position: fixed;
-            top: calc(50% - 20px);
-            left: 5px;
-            color: var(--paper-light-blue-500);
-            background: var(--paper-light-blue-50);
-            border-radius: 50%;
-        }
-
-        paper-icon-button.back-button:hover {
-            background: var(--paper-light-blue-100);
-            border-radius: 50%;
-        }
-
-        .centered {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            z-index: 10;
-        }
         </style>
-      </custom-style>
 
-      <paper-icon-button id="navigation-back-button" icon="arrow-back" on-click="scrollLeftButton" alt="heart" class="back-button"></paper-icon-button>
-        <paper-icon-button id="navigation-forward-button" icon="arrow-forward" on-click="scrollRightButton" alt="heart" class="forward-button"></paper-icon-button>
-        <div id="main-container">
-          <div id="navigation-scroll">
-              <div id="navigation-container"></div>
+        <div id="{{_viewportId}}" class="owc-core-window-manager-viewport">
+          <div id="panels-container">
           </div>
         </div>
     </template>
     <script>
 
+      class OwcCoreWindowManager extends Polymer.Element {
 
-    /**
-     * `owc-core-window-manager`
-     * This component manages the currently displayed components using the navigation stack, which is represented by an array of components. The first element in the array is the root, the dynamic-main-menu. The last element in the array is the last component displayed at the right of the screen (in Desktop view). The user can add components to the stack using the method pushComponent of navigation manager and can remove all components from the navigation stack, except for the root element, using the popComponent method. In Desktop view the new component is pushed on the right of the last visualized component, while in Mobile view the new component is pushed up to the currently visualized component.
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
-    class OwcCoreWindowManager extends Polymer.Element {
-        static get is() { return 'owc-core-window-manager'; }
+          static get is() { return 'owc-core-window-manager'; }
 
-        static get properties() {
-            return {
-                counter: {
-                    type: Number,
-                    value: 0,
-                    notify: true
-                },
-                _navigationStack:{
-                  type: Array,
-                  value: []
-                },
-                _containerView:{
-                  type: Object,
-                  value: {}
-                },
-                ctx:{
-                  type: Object,
-                  value: {}
-                }
-            };
-        }
+          static get properties() {
+              return {
+                  counter: { type: Number, value: 0, notify: true },
+                  _navigationStack:{ type: Array, value: [] },
+                  _containerView:{ type: Object, value: {} },
+                  _ctx:{ type: Object, value: {} },
+                  _viewportId: { type: String,
+                    value: "owc-core-window-manager-viewport"},
+                  _containerId: { type: String,
+                    value: "owc-core-window-manager-container" },
+                  _theme: { type: Object, observer: "_themeChanged",
+                    value: {backgroundUrl:"", backgroundColor:"" } }
+              };
+          }
 
-        connectedCallback() {
-          super.connectedCallback();
-          this.MOBILE_MODE = Symbol();
-          this.DESKTOP_MODE = Symbol();
-          this.layoutMode = this.DESKTOP_MODE;
-          this.isMaximized=false;
-          this.updateStyles({'--theme-background-image': 'url("Sentinel-2-algeria.jpg")'});
-          this.updateStyles({'--theme-background-color':'rgba(233,244,255,0.94) !important'});
-          this.updateStyles({'--theme-default-color':'rgba(233,244,255,0.94) !important'});
-          this.__init__();
-        }
+          connectedCallback() {
+            super.connectedCallback();
+            this._theme = { backgroundUrl: "url", backgroundColor: "color" };
+            this.manageEscButton();
+          }
 
-        disconnectedCallback() {
-          super.disconnectedCallback();
-        }
+          disconnectedCallback() {
+            super.disconnectedCallback();
+          }
 
+          _createPanel(ctx){
+            return new OwcCoreNavigationPanel(ctx);
+          }
 
+          popComponent() {
+            var viewport = this.shadowRoot.querySelector("#panels-container");
+            viewport.lastChild.del();
+          }
 
-        /**
-         * Allow to pop a component from navigation manager via ESC button
-         *
-         * @return {null}
-         */
-        manageEscButton() {
-            var self = this,
-                ESC_BUTTON_CODE = 27;
-            document.addEventListener('keyup', function(e) {
-                if (e.keyCode == ESC_BUTTON_CODE) {
-                    console.log('ESC');
-                }
-            });
-        }
+          _themeChanged(newVal, oldVal) {
 
-        /**
-         * Scroll navigation manager container (GUI part) to left
-         *
-         * @return {null}
-         */
-        scrollLeftButton() {
-            Polymer.dom(this.root).querySelector("#navigation-container").scrollLeft = 0;
-        }
+          }
 
-        /**
-         * Scroll navigation manager container (GUI part) to right
-         *
-         * @return {null}
-         */
-        scrollRightButton() {
-            Polymer.dom(this.root).querySelector("#navigation-container").scrollLeft = Polymer.dom(this.root).querySelector('#navigation-container').childNodes[this._navigationStack.length - 1].offsetLeft;
-        }
+          pushComponent(component){
+              component._ctx = this._ctx;
+              let new_panel = this._createPanel(this._ctx);
+              this._appendPanel(new_panel);
+              new_panel.embedComponent(component);
+          }
 
+          _appendPanel(panel){
+            this.shadowRoot.querySelector("#panels-container").appendChild(panel);
+          }
 
-        /**
-         * Return component container.
-         *
-         * @return {Object} component container
-         */
-        getContainer() {
-            var self = this;
-            return Polymer.dom(self.root).querySelector('#navigation-container');
-        }
+          manageEscButton() {
+              var self = this,
+                  ESC_BUTTON_CODE = 27;
+              document.addEventListener('keyup', function(e) {
+                  if (e.keyCode == ESC_BUTTON_CODE) {
+                      self.popComponent();
+                      console.log("ESC");
+                  }
+              });
+          }
 
+      }
 
-        /**
-         * Pop a polymer from navigation-component.
-         *
-         * @return {null}
-         */
-        popComponent() {
+      window.customElements.define(OwcCoreWindowManager.is, OwcCoreWindowManager);
 
-        }
-
-        /**
-         * Push a polymer to navigation-component.
-         *
-         * @param {Polymer.Base} component: The new polymer to show in the navigation.
-         * @param {Number} panelWidth: (pixel) of container panel.
-         * @param {String} title:  Title of panel.
-         * @return {null}
-         */
-        pushComponent(component, width, title) {
-            var self = this;
-            component.ctx = this.ctx;
-            var componentInstances = 0;
-            var panel = document.createElement('owc-core-navigation-panel');
-            var containerView = this.getContainer();
-            self.uuid++;
-            panel.uuid = self.uuid;
-            panel.width = width;
-            panel.title = title;
-            panel.navigationManager = self;
-            panel.name = component.is;
-            component.container = panel;
-            panel.content = component;
-            Polymer.dom(containerView).appendChild(panel);
-            panel.embedComponent(component);
-
-        }
-
-        /**
-         * Initialize the navigation manager
-         *
-         * @return {null}
-         */
-        __init__() {
-            var self = this;
-            self.uuid = 0;
-        }
-    }
-
-    window.customElements.define(OwcCoreWindowManager.is, OwcCoreWindowManager);
     </script>
 </dom-module>

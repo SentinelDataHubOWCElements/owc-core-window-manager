@@ -3,227 +3,109 @@
 <link rel="import" href="../paper-styles/shadow.html">
 <dom-module id="owc-core-navigation-panel">
     <template>
-      <custom-style>
-        <style is="custom-style">
-         :host {
-            height: calc(100% - 5px) !important;
-            width: var(--host-width, 200px);
-            margin: 5px;
+        <style>
+          :host{
             display: inline-block;
             position: relative;
-            margin-left: var (--paper-navigation-panel-left, 5px !important);
-            margin-right: 5px;
             min-width: 150px;
-            background-color: white;
-        }
-
-        :host {
-            height: var(--heightnav, 500px);
-        }
-
-        .close-panel-button {
-            display: var(--close-panel-button-display, none);
-        }
-
-        shadow {
-            border-radius: 5px;
-            padding: var(--paper-navigation-panel-container-padding, 5px);
-            margin: var(--paper-navigation-panel-container-margin, 5px);
-            height: var(--paper-navigation-panel-container-height, calc(100% - 10px) !important);
-            width: var(--paper-navigation-panel-container-width, calc(100% - 10px));
-            position: var(--paper-navigation-panel-container-position, relative);
-            margin-left: var (--paper-navigation-panel-left, 5px !important);
-            opacity: var(--paper-navigation-panel-opacity, "0.94 !important");
-
-        }
-
-        .paper-navigation-panel-container {
-            position: absolute;
-            overflow: hidden;
-            width: calc(100% - 15px);
-            height: calc(100%);
-            font-size: 20px;
-        }
-
-        .paper-navigation-panel {
-            overflow-x: auto;
-            height: calc(100% - 10px) !important;
-        }
-
-
-        .close-panel-button {
-            position: var(--close-panel-button, absolute !important);
-            top: 2px;
-            right: 0px;
-            z-index: 200;
-            overflow: hidden;
-            display: var(--close-panel-button-display, none);
-            font-size: 10px;
-            width: 30px;
-            height: 30px;
-        }
-
-        .maximize-panel-button {
-            position: var(--maximize-panel-button, absolute !important);
-            top: 2px;
-            right: 25px;
-            z-index: 200;
-            overflow: hidden;
-            display: var(--maximize-panel-button-display, none);
-            font-size: 10px;
-            width: 30px;
-            height: 30px;
-        }
-
-        .close-panel-button:hover {
-            opacity: 0.6;
-        }
-
-        .maximize-panel-button:hover {
-            opacity: 0.6;
-        }
-
-        shadow {
-            background-color: var(--theme-background-color);
-        }
-
-        .panel-title {
+            height: calc(100% - 15px) !important;
+            width: var(--host-width, 200px);
+            margin:5px;
+            -webkit-transition: opacity 1s ease-in-out;
+            -moz-transition: opacity 1s ease-in-out;
+            -ms-transition: opacity 1s ease-in-out;
+            -o-transition: opacity 1s ease-in-out;
+            opacity: var(--navigation-panel-opacity, 0);
+          }
+          #owc-core-navigation-panel-main-container{
+            width:  var(--owc-core-navigation-panel-width, 100%);
+            height: var(--owc-core-navigation-panel-height, 100%);
             position: relative;
-            height: 35px;
-            font-size: 20px;
-            width: calc(100% - 5px);
-            text-align: center;
-            font-weight: bold;
-            top: 3px;
-        }
+          }
 
-        #resizer {
+          #owc-core-navigation-panel{
+            background-color: var(--owc-core-navigation-panel-width,  #fff);
             position: absolute;
-            width: 5px;
-            height: calc(100% - 3px);
-            top: 5px;
-            right: 0;
-            z-index: 10000;
-            overflow: none !important;
-            cursor: e-resize;
-            opacity: 0;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            -o-user-select: none;
-            user-select: none;
-            display: var(--paper-navigation-panel-resize-display, block);
-            resize: horizontal;
-        }
+            width: calc(100%-40px);
+            height: 100%;
+            border-radius: 2px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+          }
 
-        #component-container{
+          #owc-core-navigation-panel-container{
+              position: relative;
+              top: 10px;
+              width:calc(100% - 25px);
+              height:calc(100% - 25px);
+              overflow-y: auto;
+              margin-left:10px;
+          }
 
-            /*background-color: white;*/
-        }
 
-        .shadow-2dp { @apply --shadow-elevation-2dp; }
+
         </style>
-      </custom-style>
-        <div id="resizer">
+
+        <div id="owc-core-navigation-panel-main-container" >
+          <!-- <div style="position:absolute"> -->
+            <div id="owc-core-navigation-panel">
+
+              <!-- PANEL HEADER -->
+              <div></div>
+              <!-- PANEL CONTAINER -->
+              <div id="owc-core-navigation-panel-container"></div>
+              <!-- PANEL FOOTER -->
+              <div></div>
+
+            </div>
+          <!-- </div> -->
         </div>
-        <div class="close-panel-button-container horizontal layout">
-            <paper-icon-button class="close-panel-button" icon="close" on-click="closePanel" alt="close"></paper-icon-button>
-            <paper-icon-button class="maximize-panel-button" icon="{{buttonIcon}}" on-click="switchPanelView" alt="{{buttonTitle}}"></paper-icon-button>
-        </div>
-        <div class="paper-navigation-panel shadow shadow-2dp" id="paper-navigation-panel">
-            <div class="panel-title">{{title}}</div>
-            <div id="component-container" class="paper-navigation-panel-container"></div>
-        </div>
+
     </template>
     <script>
 
-    /**
-     * `owc-core-navigation-panel`
-     * This component is the container of the custom components displayed in the OWC 2.o Starter Kit by means of the dynamic menu.
-     * @customElement
-     * @polymer
-     */
-    class OwcCoreNavigationPanel extends Polymer.Element {
-        static get is() { return 'owc-core-navigation-panel'; }
-        static get properties() {
-            return {
-                uuid: {
-                    type: Number,
-                    value: 0,
-                    notify: true,
-                    readOnly: false
-                },
+      class OwcCoreNavigationPanel extends Polymer.Element {
+          static get is() { return "owc-core-navigation-panel"; }
+          static get properties() {
+              return {
+                  title: { type: String, value: "" },
+                  content: { type: Object, value: {} },
+                  name: { type: String, value: "" }
+              };
+          }
 
-                /**
-                 * width of panel
-                 *
-                 * @type {Object}
-                 */
-                width: {
-                    type: Number,
-                    value: 0
-                },
+          embedComponent(component){
+            this.shadowRoot
+              .querySelector("#owc-core-navigation-panel-container")
+              .appendChild(component);
+          }
 
-                /**
-                 * Panel title
-                 *
-                 * @type {String}
-                 */
-                title: {
-                    type: String,
-                    value: "",
-                    notify: true
-                },
+          constructor(ctx){
+            super();
+            this._ctx = ctx;
+          }
 
-                /**
-                 * Panel content
-                 *
-                 * @type {String}
-                 */
-                content: {
-                    type: Object,
-                    value: {},
-                    notify: true
-                },
-
-                /**
-                 * component name
-                 *
-                 * @type {String}
-                 */
-                name: {
-                    type: String,
-                    value: "",
-                    notify: true
-                }
-            };
-        }
-
-        embedComponent(component){
-          this.shadowRoot.querySelector('#component-container').appendChild(component);
-        }
-
-        constructor(){
-          super();
-        }
-
-        connectedCallback(){
-          super.connectedCallback();
-          this.__init();
-        }
-
-        /**
-         *  This method manages the panel resize event
-         *
-         * @return {null}
-         */
-        __init() {
+          connectedCallback(){
+            super.connectedCallback();
             var self = this;
-            self.resize = false;
+            setTimeout(function(){self.updateStyles({"--navigation-panel-opacity": 1});},0);
+          }
 
-        }
-    }
+          ready() {
+            super.ready();
 
-    window.customElements.define(OwcCoreNavigationPanel.is, OwcCoreNavigationPanel);
+          }
+
+          del(){
+            console.warn("del");
+            var self = this;
+            this.updateStyles({"--navigation-panel-opacity": 0});
+            setTimeout(function(){self.remove()},1000);
+          }
+
+      }
+
+      window.customElements
+        .define(OwcCoreNavigationPanel.is, OwcCoreNavigationPanel);
+
     </script>
 </dom-module>
