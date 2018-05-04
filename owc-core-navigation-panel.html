@@ -1,8 +1,7 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-styles/shadow.html">
-<link rel="import" href="../iron-icons/maps-icons.html">
-<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
 <dom-module id="owc-core-navigation-panel">
     <template>
         <style>
@@ -36,19 +35,21 @@
 
           .close-button{
             position: absolute;
-            right: 5px;
-            top: 3px;
+            right: 0px;
+            /*top: 3px;*/
             cursor:pointer;
             display: none;
+            width: 35px;
+            height:35px;
 
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+/Edge */
-            user-select: none; /* Standard */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
           }
 
           .close-button:active{
-            color:green;
+            color:blue;
           }
 
           .panel-header{
@@ -85,7 +86,7 @@
               <!-- PANEL HEADER -->
               <div class="panel-header">
                 <!-- <div class="close-button">x</div> -->
-                <paper-icon-button class="close-button" icon="close"  alt="close"></paper-icon-button>
+                <paper-icon-button class="close-button" icon="close"  on-click="handleClose" alt="close"></paper-icon-button>
               </div>
               <!-- PANEL CONTAINER -->
               <div id="owc-core-navigation-panel-container"></div>
@@ -136,6 +137,10 @@
             var self = this;
             this.updateStyles({"--navigation-panel-opacity": 0});
             setTimeout(function(){self.remove()},1000);
+          }
+
+          handleClose(){
+            this.del();
           }
 
       }
