@@ -17,8 +17,8 @@
             height: 100%;
             overflow-x: var(--owc-core-window-manager-viewport-overflow, auto);
             background-image: var(--owc-core-window-manager-background-image);
-            background: #FAFAFA;
-            overflow-y: hidden;
+              background: #91A9D2;
+            /*overflow-y: hidden;*/
             overflow-x: auto !important;
 
           }
@@ -27,6 +27,7 @@
             position:relative;
             height: 100%;
             width:100%;
+            overflow-y: auto;
           }
 
           .owc-core-window-manager-container{
@@ -89,6 +90,7 @@
               let new_panel = this._createPanel(this._ctx);
               this._appendPanel(new_panel);
               new_panel.embedComponent(component);
+              console.log("this.shadowRoot.querySelector('.panels-container')", this.shadowRoot.querySelector('.panels-container'));
           }
 
           _appendPanel(panel){

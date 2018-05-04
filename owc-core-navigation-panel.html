@@ -8,15 +8,21 @@
           :host{
             display: inline-block;
             position: relative;
-            min-width: 150px;
-            height: calc(100% - 15px) !important;
-            width: var(--host-width, 200px);
+            min-width: 200px;
+            width: calc(32% - 10px);
+            max-width: 100%;
+            /*min-height: 300px;*/
+            height: 95% !important;
+            max-height: calc(100% - 15px) !important;
+            width: var(--host-width, 300px !important);
             margin:5px;
             -webkit-transition: opacity 1s ease-in-out;
             -moz-transition: opacity 1s ease-in-out;
             -ms-transition: opacity 1s ease-in-out;
             -o-transition: opacity 1s ease-in-out;
             opacity: var(--navigation-panel-opacity, 0);
+
+
           }
 
           :host:hover{
@@ -27,6 +33,7 @@
             width:  var(--owc-core-navigation-panel-width, 100%);
             height: var(--owc-core-navigation-panel-height, 100%);
             position: relative;
+
           }
 
           #owc-core-navigation-panel:hover .close-button{
@@ -60,7 +67,7 @@
           #owc-core-navigation-panel{
             background-color: var(--owc-core-navigation-panel-width,  #fff);
             position: absolute;
-            width: calc(100%-40px);
+            width: calc(100% - 0px);
             height: 100%;
             border-radius: 2px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
@@ -78,24 +85,26 @@
 
 
         </style>
+        <!-- <drag-resize drag="left right" resize="bottom right" id="owc-core-navigation-panel-main-container"> -->
+          <div id="owc-core-navigation-panel-main-container" >
+            <!-- <div style="position:absolute"> -->
+              <div id="owc-core-navigation-panel">
 
-        <div id="owc-core-navigation-panel-main-container" >
-          <!-- <div style="position:absolute"> -->
-            <div id="owc-core-navigation-panel">
+                <!-- PANEL HEADER -->
+                <div class="panel-header">
+                  <!-- <div class="close-button">x</div> -->
+                  <paper-icon-button class="close-button" icon="close"  on-click="handleClose" alt="close"></paper-icon-button>
+                </div>
+                <!-- PANEL CONTAINER -->
+                <div id="owc-core-navigation-panel-container"></div>
+                <!-- PANEL FOOTER -->
+                <div class="panel-footer"></div>
 
-              <!-- PANEL HEADER -->
-              <div class="panel-header">
-                <!-- <div class="close-button">x</div> -->
-                <paper-icon-button class="close-button" icon="close"  on-click="handleClose" alt="close"></paper-icon-button>
               </div>
-              <!-- PANEL CONTAINER -->
-              <div id="owc-core-navigation-panel-container"></div>
-              <!-- PANEL FOOTER -->
-              <div class="panel-footer"></div>
-
-            </div>
+            <!-- </div> -->
           <!-- </div> -->
         </div>
+        <!-- </drag-resize> -->
 
     </template>
     <script>
