@@ -1,6 +1,8 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-styles/shadow.html">
+<link rel="import" href="../iron-icons/maps-icons.html">
+<link rel="import" href="../paper-material/paper-material.html">
 <dom-module id="owc-core-navigation-panel">
     <template>
         <style>
@@ -17,10 +19,41 @@
             -o-transition: opacity 1s ease-in-out;
             opacity: var(--navigation-panel-opacity, 0);
           }
+
+          :host:hover{
+              background-color: black;
+          }
+
           #owc-core-navigation-panel-main-container{
             width:  var(--owc-core-navigation-panel-width, 100%);
             height: var(--owc-core-navigation-panel-height, 100%);
             position: relative;
+          }
+
+          #owc-core-navigation-panel:hover .close-button{
+            display:block;
+          }
+
+          .close-button{
+            position: absolute;
+            right: 5px;
+            top: 3px;
+            cursor:pointer;
+            display: none;
+
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+          }
+
+          .close-button:active{
+            color:green;
+          }
+
+          .panel-header{
+            height: 25px;
+            width: 100%;
           }
 
           #owc-core-navigation-panel{
@@ -36,7 +69,7 @@
               position: relative;
               top: 10px;
               width:calc(100% - 25px);
-              height:calc(100% - 25px);
+              height:calc(100% - 50px);
               overflow-y: auto;
               margin-left:10px;
           }
@@ -50,11 +83,14 @@
             <div id="owc-core-navigation-panel">
 
               <!-- PANEL HEADER -->
-              <div></div>
+              <div class="panel-header">
+                <!-- <div class="close-button">x</div> -->
+                <paper-icon-button class="close-button" icon="close"  alt="close"></paper-icon-button>
+              </div>
               <!-- PANEL CONTAINER -->
               <div id="owc-core-navigation-panel-container"></div>
               <!-- PANEL FOOTER -->
-              <div></div>
+              <div class="panel-footer"></div>
 
             </div>
           <!-- </div> -->
