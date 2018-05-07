@@ -17,8 +17,8 @@
             height: 100%;
             overflow-x: var(--owc-core-window-manager-viewport-overflow, auto);
             background-image: var(--owc-core-window-manager-background-image);
-              background: #91A9D2;
-            /*overflow-y: hidden;*/
+            background: #91A9D2;
+
             overflow-x: auto !important;
 
           }
@@ -85,12 +85,45 @@
 
           }
 
+          _easeInOutQuad(t, b, c, d) {
+            t /= d/2;
+            if (t < 1) return c/2*t*t + b;
+            t--;
+            return -c/2 * (t*(t-2) - 1) + b;
+          };
+
+
+          _scrollTo(element, to, duration) {
+            var self = this;
+              var start = element.scrollTop,
+                  change = to - start,
+                  currentTime = 0,
+                  increment = 20;
+
+              var animateScroll = function(){
+                  currentTime += increment;
+                  var val = self._easeInOutQuad(currentTime, start, change, duration);
+                  element.scrollTop = val;
+                  if(currentTime < duration) {
+                      setTimeout(animateScroll, increment);
+                  }
+              };
+              animateScroll();
+          }
+
+          _scrollToBottom(){
+            var scrollHeight =  this.shadowRoot.querySelector('#panels-container').scrollHeight ;
+            this._scrollTo(this.shadowRoot.querySelector('#panels-container'), scrollHeight, 500);
+          }
+
           pushComponent(component){
+              var self = this;
               component._ctx = this._ctx;
               let new_panel = this._createPanel(this._ctx);
               this._appendPanel(new_panel);
               new_panel.embedComponent(component);
-              console.log("this.shadowRoot.querySelector('.panels-container')", this.shadowRoot.querySelector('.panels-container'));
+              this._scrollToBottom();
+
           }
 
           _appendPanel(panel){
