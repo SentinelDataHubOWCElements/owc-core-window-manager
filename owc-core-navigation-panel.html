@@ -2,25 +2,30 @@
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-styles/shadow.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
+ <link href="http://it.allfont.net/allfont.css?fonts=commodore-64-rounded" rel="stylesheet" type="text/css" />
 <dom-module id="owc-core-navigation-panel">
     <template>
         <style>
+          @import url(http://it.allfont.net/allfont.css?fonts=commodore-64-rounded);
+
           :host{
             display: inline-block;
             position: relative;
             min-width: 200px;
-            width: calc(32% - 10px);
+            width: var(--host-width, calc(100% - 10px));
             max-width: 100%;
             /*min-height: 300px;*/
             height: 95% !important;
             max-height: calc(100% - 15px) !important;
-            width: var(--host-width, 300px !important);
+            /*width: var(--host-width, 300px !important);*/
             margin:5px;
-            -webkit-transition: opacity 1s ease-in-out;
-            -moz-transition: opacity 1s ease-in-out;
-            -ms-transition: opacity 1s ease-in-out;
-            -o-transition: opacity 1s ease-in-out;
+            -webkit-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
+            -moz-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
+            -ms-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
+            -o-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
             opacity: var(--navigation-panel-opacity, 0);
+
+
 
 
           }
@@ -120,7 +125,7 @@
           }
 
           embedComponent(component){
-            this.shadowRoot
+            this.shadowRoot// width: var(--host-width, calc(100% - 10px));
               .querySelector("#owc-core-navigation-panel-container")
               .appendChild(component);
           }
@@ -138,6 +143,25 @@
 
           ready() {
             super.ready();
+
+          }
+
+          setLayout(mode){
+            switch(mode){
+              case "FULL":
+                this.setPercWidth(100);
+              break;
+              case "TWO":
+                this.setPercWidth(50);
+              break;
+              case "FOUR":
+                this.setPercWidth(25);
+              break;
+            }
+          }
+          setPercWidth(percent){
+             this.updateStyles({'--host-width': "calc(" + percent + "% - 10px)"});
+
 
           }
 

@@ -49,6 +49,7 @@
 
           static get properties() {
               return {
+                  mode: { type: String, value: "FOUR", notify: true },
                   counter: { type: Number, value: 0, notify: true },
                   _navigationStack:{ type: Array, value: [] },
                   _containerView:{ type: Object, value: {} },
@@ -79,6 +80,21 @@
           popComponent() {
             var viewport = this.shadowRoot.querySelector("#panels-container");
             viewport.lastChild.del();
+          }
+
+          setLayoutTwo(){
+
+          }
+
+          setLayout(mode){
+            this.mode = mode;
+            var panels = this.shadowRoot.querySelector('#panels-container').children;
+
+            for(var i = 0; i < panels.length; i++){
+              panels[i].setLayout(mode);
+            }
+
+            this._scrollToBottom();
           }
 
           _themeChanged(newVal, oldVal) {
@@ -122,6 +138,7 @@
               let new_panel = this._createPanel(this._ctx);
               this._appendPanel(new_panel);
               new_panel.embedComponent(component);
+              new_panel.setLayout(this.mode);
               this._scrollToBottom();
 
           }
