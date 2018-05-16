@@ -3,7 +3,11 @@
   "description": "This component manages the currently displayed components using the navigation stack, which is represented by an array of components. The first element in the array is the root, the dynamic-main-menu. The last element in the array is the last component displayed at the right of the screen (in Desktop view). The user can add components to the stack using the method pushComponent of navigation manager and can remove all components from the navigation stack, except for the root element, using the popComponent method. In Desktop view the new component is pushed on the right of the last visualized component, while in Mobile view the new component is pushed up to the currently visualized component.",
   "main": "owc-core-window-manager.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^2.0.0"
+    "polymer": "Polymer/polymer#^2.0.0",
+    "paper-icon-button": "PolymerElements/paper-icon-button#2.0.1",
+    "iron-icons":"PolymerElements/iron-icons#2.1.1",
+    "paper-styles": "PolymerElements/paper-styles#2.0.0",
+    "underscore": "1.8.3"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
