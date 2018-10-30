@@ -3,163 +3,145 @@
 <link rel="import" href="../owc-core-window-manager/owc-core-navigation-panel.html">
 <script src="../underscore/underscore-min.js"></script>
 <dom-module id="owc-core-window-manager">
-    <template>
-        <style>
-          :host{
-              position:absolute;
-              width: 100%;
-              height: 100%;
-
-          }
-          .owc-core-window-manager-viewport{
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow-x: var(--owc-core-window-manager-viewport-overflow, auto);
-            background-image: var(--owc-core-window-manager-background-image);
-            background: #91A9D2;
-
-            overflow-x: auto !important;
-
-          }
-
-          #panels-container{
-            position:relative;
-            height: 100%;
-            width:100%;
-            overflow-y: auto;
-          }
-
-          .owc-core-window-manager-container{
-
-          }
-
-        </style>
-
-        <div id="{{_viewportId}}" class="owc-core-window-manager-viewport">
-          <div id="panels-container">
-          </div>
-        </div>
-    </template>
-    <script>
-
-      class OwcCoreWindowManager extends Polymer.Element {
-
-          static get is() { return 'owc-core-window-manager'; }
-
-          static get properties() {
-              return {
-                  mode: { type: String, value: "FOUR", notify: true },
-                  counter: { type: Number, value: 0, notify: true },
-                  _navigationStack:{ type: Array, value: [] },
-                  _containerView:{ type: Object, value: {} },
-                  _ctx:{ type: Object, value: {} },
-                  _viewportId: { type: String,
-                    value: "owc-core-window-manager-viewport"},
-                  _containerId: { type: String,
-                    value: "owc-core-window-manager-container" },
-                  _theme: { type: Object, observer: "_themeChanged",
-                    value: {backgroundUrl:"", backgroundColor:"" } }
-              };
-          }
-
-          connectedCallback() {
-            super.connectedCallback();
-            this._theme = { backgroundUrl: "url", backgroundColor: "color" };
-            this.manageEscButton();
-          }
-
-          disconnectedCallback() {
-            super.disconnectedCallback();
-          }
-
-          _createPanel(ctx){
-            return new OwcCoreNavigationPanel(ctx);
-          }
-
-          popComponent() {
-            var viewport = this.shadowRoot.querySelector("#panels-container");
-            viewport.lastChild.del();
-          }
-
-          setLayoutTwo(){
-
-          }
-
-          setLayout(mode){
-            this.mode = mode;
-            var panels = this.shadowRoot.querySelector('#panels-container').children;
-
-            for(var i = 0; i < panels.length; i++){
-              panels[i].setLayout(mode);
-            }
-
-            this._scrollToBottom();
-          }
-
-          _themeChanged(newVal, oldVal) {
-
-          }
-
-          _easeInOutQuad(t, b, c, d) {
-            t /= d/2;
-            if (t < 1) return c/2*t*t + b;
-            t--;
-            return -c/2 * (t*(t-2) - 1) + b;
-          };
-
-
-          _scrollTo(element, to, duration) {
-            var self = this;
-              var start = element.scrollTop,
-                  change = to - start,
-                  currentTime = 0,
-                  increment = 20;
-
-              var animateScroll = function(){
-                  currentTime += increment;
-                  var val = self._easeInOutQuad(currentTime, start, change, duration);
-                  element.scrollTop = val;
-                  if(currentTime < duration) {
-                      setTimeout(animateScroll, increment);
-                  }
-              };
-              animateScroll();
-          }
-
-          _scrollToBottom(){
-            var scrollHeight =  this.shadowRoot.querySelector('#panels-container').scrollHeight ;
-            this._scrollTo(this.shadowRoot.querySelector('#panels-container'), scrollHeight, 500);
-          }
-
-          pushComponent(component){
-              var self = this;
-              component._ctx = this._ctx;
-              let new_panel = this._createPanel(this._ctx);
-              this._appendPanel(new_panel);
-              new_panel.embedComponent(component);
-              new_panel.setLayout(this.mode);
-              this._scrollToBottom();
-
-          }
-
-          _appendPanel(panel){
-            this.shadowRoot.querySelector("#panels-container").appendChild(panel);
-          }
-
-          manageEscButton() {
-              var self = this,
-                  ESC_BUTTON_CODE = 27;
-              document.addEventListener('keyup', function(e) {
-                  if (e.keyCode == ESC_BUTTON_CODE) {
-                      self.popComponent();
-                  }
-              });
-          }
-
+  <template>
+    <style>
+      :host {
+        position: absolute;
+        width: 100%;
+        height: 100%;
       }
 
-      window.customElements.define(OwcCoreWindowManager.is, OwcCoreWindowManager);
+      .owc-core-window-manager-viewport {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow-x: var(--owc-core-window-manager-viewport-overflow, auto);
+        background-image: var(--owc-core-window-manager-background-image);
+        background: #91A9D2;
+        overflow-x: auto !important;
+      }
 
-    </script>
+      #panels-container {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow-y: auto;
+      }
+    </style>
+
+    <div id="{{_viewportId}}" class="owc-core-window-manager-viewport">
+      <div id="panels-container"></div>
+    </div>
+  </template>
+  <script>
+    class OwcCoreWindowManager extends Polymer.Element {
+      static get is() { return 'owc-core-window-manager'; }
+      static get properties() {
+        return {
+          mode: { type: String, value: "FOUR", notify: true },
+          counter: { type: Number, value: 0, notify: true },
+          _navigationStack: { type: Array, value: [] },
+          _containerView: { type: Object, value: {} },
+          _ctx: { type: Object, value: {} },
+          _viewportId: {
+            type: String,
+            value: "owc-core-window-manager-viewport"
+          },
+          _containerId: {
+            type: String,
+            value: "owc-core-window-manager-container"
+          },
+          _theme: {
+            type: Object, observer: "_themeChanged",
+            value: { backgroundUrl: "", backgroundColor: "" }
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._theme = { backgroundUrl: "url", backgroundColor: "color" };
+        this.manageEscButton();
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+      }
+
+      _createPanel(ctx) {
+        return new OwcCoreNavigationPanel(ctx);
+      }
+
+      popComponent() {
+        var viewport = this.shadowRoot.querySelector("#panels-container");
+        viewport.lastChild.del();
+      }
+
+      setLayout(mode) {
+        this.mode = mode;
+        var panels = this.shadowRoot.querySelector('#panels-container').children;
+        for (var i = 0; i < panels.length; i++) {
+          panels[i].setLayout(mode);
+        }
+        this._scrollToBottom();
+      }
+
+      pushComponent(component) {
+        var self = this;
+        component._ctx = this._ctx;
+        let new_panel = this._createPanel(this._ctx);
+        this._appendPanel(new_panel);
+        new_panel.embedComponent(component);
+        new_panel.setLayout(this.mode);
+        this._scrollToBottom();
+      }
+
+      _themeChanged(newVal, oldVal) { }
+
+      _easeInOutQuad(t, b, c, d) {
+        t /= d / 2;
+        if (t < 1) return c / 2 * t * t + b;
+        t--;
+        return -c / 2 * (t * (t - 2) - 1) + b;
+      };
+
+      _scrollTo(element, to, duration) {
+        var self = this;
+        var start = element.scrollTop,
+          change = to - start,
+          currentTime = 0,
+          increment = 20;
+
+        var animateScroll = function () {
+          currentTime += increment;
+          var val = self._easeInOutQuad(currentTime, start, change, duration);
+          element.scrollTop = val;
+          if (currentTime < duration) {
+            setTimeout(animateScroll, increment);
+          }
+        };
+        animateScroll();
+      }
+
+      _scrollToBottom() {
+        var scrollHeight = this.shadowRoot.querySelector('#panels-container').scrollHeight;
+        this._scrollTo(this.shadowRoot.querySelector('#panels-container'), scrollHeight, 500);
+      }
+
+      _appendPanel(panel) {
+        this.shadowRoot.querySelector("#panels-container").appendChild(panel);
+      }
+
+      manageEscButton() {
+        var self = this,
+          ESC_BUTTON_CODE = 27;
+        document.addEventListener('keyup', function (e) {
+          if (e.keyCode == ESC_BUTTON_CODE) {
+            self.popComponent();
+          }
+        });
+      }
+    }
+    window.customElements.define(OwcCoreWindowManager.is, OwcCoreWindowManager);
+  </script>
 </dom-module>
