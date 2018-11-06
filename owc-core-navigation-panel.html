@@ -2,183 +2,153 @@
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-styles/shadow.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
- <link href="http://it.allfont.net/allfont.css?fonts=commodore-64-rounded" rel="stylesheet" type="text/css" />
+<link href="http://it.allfont.net/allfont.css?fonts=commodore-64-rounded" rel="stylesheet" type="text/css" />
 <dom-module id="owc-core-navigation-panel">
-    <template>
-        <style>
-          @import url(http://it.allfont.net/allfont.css?fonts=commodore-64-rounded);
+  <template>
+    <style>
+      @import url(http: //it.allfont.net/allfont.css?fonts=commodore-64-rounded);
 
-          :host{
-            display: inline-block;
-            position: relative;
-            min-width: 200px;
-            width: var(--host-width, calc(100% - 10px));
-            max-width: 100%;
-            /*min-height: 300px;*/
-            height: 95% !important;
-            max-height: calc(100% - 15px) !important;
-            /*width: var(--host-width, 300px !important);*/
-            margin:5px;
-            -webkit-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
-            -moz-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
-            -ms-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
-            -o-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out ;
-            opacity: var(--navigation-panel-opacity, 0);
-
-
-
-
-          }
-
-          :host:hover{
-              background-color: black;
-          }
-
-          #owc-core-navigation-panel-main-container{
-            width:  var(--owc-core-navigation-panel-width, 100%);
-            height: var(--owc-core-navigation-panel-height, 100%);
-            position: relative;
-
-          }
-
-          #owc-core-navigation-panel:hover .close-button{
-            display:block;
-          }
-
-          .close-button{
-            position: absolute;
-            right: 0px;
-            /*top: 3px;*/
-            cursor:pointer;
-            display: none;
-            width: 35px;
-            height:35px;
-
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-          }
-
-          .close-button:active{
-            color:blue;
-          }
-
-          .panel-header{
-            height: 25px;
-            width: 100%;
-          }
-
-          #owc-core-navigation-panel{
-            background-color: var(--owc-core-navigation-panel-width,  #fff);
-            position: absolute;
-            width: calc(100% - 0px);
-            height: 100%;
-            border-radius: 5px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-          }
-
-          #owc-core-navigation-panel-container{
-              position: relative;
-              top: 10px;
-              width:calc(100% - 25px);
-              height:calc(100% - 50px);
-              overflow-y: auto;
-              margin-left:10px;
-          }
-
-
-
-        </style>
-        <!-- <drag-resize drag="left right" resize="bottom right" id="owc-core-navigation-panel-main-container"> -->
-          <div id="owc-core-navigation-panel-main-container" >
-            <!-- <div style="position:absolute"> -->
-              <div id="owc-core-navigation-panel">
-
-                <!-- PANEL HEADER -->
-                <div class="panel-header">
-                  <!-- <div class="close-button">x</div> -->
-                  <paper-icon-button class="close-button" icon="close"  on-click="handleClose" alt="close"></paper-icon-button>
-                </div>
-                <!-- PANEL CONTAINER -->
-                <div id="owc-core-navigation-panel-container"></div>
-                <!-- PANEL FOOTER -->
-                <div class="panel-footer"></div>
-
-              </div>
-            <!-- </div> -->
-          <!-- </div> -->
-        </div>
-        <!-- </drag-resize> -->
-
-    </template>
-    <script>
-
-      class OwcCoreNavigationPanel extends Polymer.Element {
-          static get is() { return "owc-core-navigation-panel"; }
-          static get properties() {
-              return {
-                  title: { type: String, value: "" },
-                  content: { type: Object, value: {} },
-                  name: { type: String, value: "" }
-              };
-          }
-
-          embedComponent(component){
-            this.shadowRoot// width: var(--host-width, calc(100% - 10px));
-              .querySelector("#owc-core-navigation-panel-container")
-              .appendChild(component);
-          }
-
-          constructor(ctx){
-            super();
-            this._ctx = ctx;
-          }
-
-          connectedCallback(){
-            super.connectedCallback();
-            var self = this;
-            setTimeout(function(){self.updateStyles({"--navigation-panel-opacity": 1});},0);
-          }
-
-          ready() {
-            super.ready();
-
-          }
-
-          setLayout(mode){
-            switch(mode){
-              case "FULL":
-                this.setPercWidth(100);
-              break;
-              case "TWO":
-                this.setPercWidth(50);
-              break;
-              case "FOUR":
-                this.setPercWidth(25);
-              break;
-            }
-          }
-          setPercWidth(percent){
-             this.updateStyles({'--host-width': "calc(" + percent + "% - 10px)"});
-
-
-          }
-
-          del(){
-            var self = this;
-            this.updateStyles({"--navigation-panel-opacity": 0});
-            setTimeout(function(){self.remove()},1000);
-          }
-
-          handleClose(){
-            this.del();
-          }
-
+      :host {
+        display: inline-block;
+        position: relative;
+        min-width: 200px;
+        width: var(--host-width, calc(100% - 10px));
+        max-width: 100%;
+        height: 95% !important;
+        max-height: calc(100% - 15px) !important;
+        margin: 5px;
+        -webkit-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out;
+        -moz-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out;
+        -ms-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out;
+        -o-transition: opacity 0.5s ease-in-out, width 0.5s ease-in-out;
+        opacity: var(--navigation-panel-opacity, 0);
       }
 
-      window.customElements
-        .define(OwcCoreNavigationPanel.is, OwcCoreNavigationPanel);
+      :host:hover {
+        background-color: black;
+      }
 
-    </script>
+      #owc-core-navigation-panel-main-container {
+        width: var(--owc-core-navigation-panel-width, 100%);
+        height: var(--owc-core-navigation-panel-height, 100%);
+        position: relative;
+      }
+
+      #owc-core-navigation-panel:hover .close-button {
+        display: block;
+      }
+
+      .close-button {
+        position: absolute;
+        right: 0px;
+        cursor: pointer;
+        display: none;
+        width: 35px;
+        height: 35px;
+
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .close-button:active {
+        color: blue;
+      }
+
+      .panel-header {
+        height: 25px;
+        width: 100%;
+      }
+
+      #owc-core-navigation-panel {
+        background-color: var(--owc-core-navigation-panel-width, #fff);
+        position: relative;
+        width: calc(100% - 0px);
+        height: 100%;
+        border-radius: 5px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+      }
+
+      #owc-core-navigation-panel-container {
+        position: relative;
+        width: calc(100% - 20px);
+        height: calc(100% - 50px);
+        overflow-y: auto;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+    </style>
+
+    <div id="owc-core-navigation-panel-main-container">
+      <div id="owc-core-navigation-panel">
+        <div class="panel-header">
+          <paper-icon-button class="close-button" icon="close" on-click="handleClose" alt="close"></paper-icon-button>
+        </div>
+        <div id="owc-core-navigation-panel-container"></div>
+        <div class="panel-footer"></div>
+      </div>
+    </div>
+  </template>
+  <script>
+
+    class OwcCoreNavigationPanel extends Polymer.Element {
+      static get is() { return "owc-core-navigation-panel"; }
+      static get properties() {
+        return {
+          title: { type: String, value: "" },
+          content: { type: Object, value: {} },
+          name: { type: String, value: "" }
+        };
+      }
+
+      embedComponent(component) {
+        this.shadowRoot// width: var(--host-width, calc(100% - 10px));
+          .querySelector("#owc-core-navigation-panel-container")
+          .appendChild(component);
+      }
+
+      constructor(ctx) {
+        super();
+        this._ctx = ctx;
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        var self = this;
+        setTimeout(function () { self.updateStyles({ "--navigation-panel-opacity": 1 }); }, 0);
+      }
+
+      setLayout(mode) {
+        switch (mode) {
+          case "FULL":
+            this.setPercWidth(100);
+            break;
+          case "TWO":
+            this.setPercWidth(50);
+            break;
+          case "FOUR":
+            this.setPercWidth(25);
+            break;
+        }
+      }
+      setPercWidth(percent) {
+        this.updateStyles({ '--host-width': "calc(" + percent + "% - 10px)" });
+      }
+
+      del() {
+        var self = this;
+        this.updateStyles({ "--navigation-panel-opacity": 0 });
+        setTimeout(function () { self.remove() }, 1000);
+      }
+
+      handleClose() {
+        this.del();
+      }
+    }
+
+    window.customElements
+      .define(OwcCoreNavigationPanel.is, OwcCoreNavigationPanel);
+
+  </script>
 </dom-module>
